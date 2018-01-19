@@ -1,0 +1,191 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="maximo-work-order">
+  <template>
+    <style include="shared-styles">
+    </style>
+    <app-localstorage-document key="savedBaseUrl" data="{{baseUrl}}"></app-localstorage-document>
+    <app-location route="{{route}}"></app-location>
+    <app-route route="{{route}}" pattern="/work-order/:woRef" data="{{pageData}}"></app-route>
+    <iron-ajax
+      id="maximoLoadWorkOrderAjax"
+      with-credentials
+      method="get"
+      handle-as="json"
+      content-type="application/json"
+      url="[[baseUrl]]maximo/oslc/os/mxwo/{{pageData.woRef}}"
+      last-response="{{workOrder}}"
+      on-response="_handleLoadResponse"
+      on-error="_handleLoadError"></iron-ajax>
+    <iron-ajax
+      id="maximoSaveWorkOrderAjax"
+      with-credentials
+      url="[[baseUrl]]maximo/oslc/os/mxwo/{{workOrder.spi:workorderid}}"
+      method="post"
+      handle-as="json"
+      content-type="application/json"
+      last-response="{{workOrder}}"
+      on-response="_handleSaveResponse"
+      on-error="_handleSaveError"></iron-ajax>
+    <template is="dom-if" if="[[error]]">
+        <p class="alert-error"><strong>Error:</strong> [[error]]</p>
+    </template>
+    <template is="dom-if" if="[[success]]">
+      <p class="alert-success"><strong>Sucess:</strong> [[success]]</p>
+    </template>
+    <paper-spinner-lite id="spinner" style="margin: auto;display: block;"></paper-spinner-lite>
+    <template is="dom-if" if="{{!(spinner.active)}}">
+        <div class="card">
+            <h3>[[workOrder.spi:woclass_description]] [[workOrder.spi:wonum]]</h3>
+            <form action="/foo" method="get">
+              <paper-input type="text"required label="Work Order" value="{{workOrder.spi:wonum}}"></paper-input>
+              <paper-input type="text"required label="Description" value="{{workOrder.spi:description}}"></paper-input>
+              <paper-dropdown-menu
+                id="woStatus"
+                label="Status">
+                <paper-listbox slot="dropdown-content" selected="{{workOrder.spi:status}}" attr-for-selected="value">
+                  <paper-item value='APPR'>Approved</paper-item>
+                  <paper-item value='WAPPR'>Waiting on Approval</paper-item>
+                  <paper-item value='WSCH'>Waiting to be Scheduled</paper-item>
+                  <paper-item value='CAN'>Canceled</paper-item>
+                  <paper-item value='CLOSE'>Closed</paper-item>
+                  <paper-item value='WMATL'>Waiting on Material</paper-item>
+                  <paper-item value='COMP'>Completed</paper-item>
+                  <paper-item value='HISTEDIT'>Edited in History</paper-item>
+                </paper-listbox>
+              </paper-dropdown-menu>
+              <paper-input id="orgId" type="text" required label="Org ID" value="{{workOrder.spi:orgid}}"></paper-input>
+              <paper-input id="siteId" type="text" required label="Site ID" value="{{workOrder.spi:siteid}}"></paper-input>
+              <paper-button raised class="indigo" raised on-tap="saveWorkOrder">Save</paper-button>&nbsp;<paper-spinner-lite id="spinner"></paper-spinner-lite>
+            </form>
+        </div>
+    </template>
+  </template>
+  <script>
+    class MaximoWorkOrder extends Polymer.Element {
+      static get is() { return 'maximo-work-order'; }
+
+      static get properties() {
+        return {
+          baseUrl: {
+            type: String,
+            observer: '_baseUrlChanged',
+          },
+          workOrder: {
+            type: Object,
+            value: {},
+            notify: true
+          },
+          whoAmI: {
+            type: Object,
+            observer: '_whoAmIChanged',
+          }
+        }
+      }
+
+      static get observers() {
+        return [
+          '_woRefChanged(pageData)'
+        ]
+      }
+
+      _showDetails() {
+        if(parseInt(this.get('pageData.woRef')) > 0) {
+          return true
+        }
+
+        return false
+      }
+
+      _woRefChanged(pageData) {
+        //if we have a valid id, load the related wo data
+        if(this._showDetails())
+        {
+          this.$.spinner.active = true
+          this.$.maximoLoadWorkOrderAjax.generateRequest()
+        } else {
+          this.set('workOrder', {})
+          this.set('workOrder.spi:orgid', this.get('whoAmI.defaultOrg') || '')
+          this.set('workOrder.spi:siteid', this.get('whoAmI.defaultSite') || '')
+        }
+      }
+
+      //After the whoAmI object is populated, we need to populate those fields
+      _whoAmIChanged() {
+        if(!this._showDetails()) {
+          this.set('workOrder.spi:orgid', this.get('whoAmI.defaultOrg') || '')
+          this.set('workOrder.spi:siteid', this.get('whoAmI.defaultSite') || '')
+        }
+      }
+
+      _baseUrlChanged() {
+        if(this._showDetails())
+        {
+          this.$.spinner.active = true
+          this.$.maximoLoadWorkOrderAjax.generateRequest()
+        }
+      }
+
+      _handleLoadResponse(event) {
+        this.$.spinner.active = false
+      }
+
+      _handleLoadError(event, request) {
+        this.$.spinner.active = false
+      }
+
+      _handleSaveResponse(event) {
+        this.$.spinner.active = false
+        if(!this._showDetails()) {
+          this.set('route.path', '/work-order/' + this.get('workOrder.spi:workorderid'))
+        } else {
+          this.success = "Work Order Successfully Saved"
+        }
+      }
+
+      _handleSaveError(event, request) {
+        this.$.spinner.active = false
+        if(event.detail.request.xhr &&
+          event.detail.request.xhr.response && 
+          event.detail.request.xhr.response["oslc:Error"] &&
+          event.detail.request.xhr.response["oslc:Error"]["oslc:message"]) {
+          this.error = event.detail.request.xhr.response["oslc:Error"]["oslc:message"];
+        } else {
+          this.error = "Could not save Work Order"
+        }
+      }
+
+      _getSaveHeaders() {
+        let headers = {'properties': '*'}
+        if(this._showDetails()) {
+          headers['x-method-override'] = 'PATCH'
+        }
+        return headers
+      }
+
+      _getSavePayload(workOrder) {
+        return workOrder
+      }
+
+      saveWorkOrder() {
+        this.$.maximoSaveWorkOrderAjax.headers = this._getSaveHeaders()
+        this.$.maximoSaveWorkOrderAjax.body = this._getSavePayload(this.get('workOrder'))
+        this.$.maximoSaveWorkOrderAjax.generateRequest()
+        this.$.spinner.active = true
+      }
+    }
+
+    window.customElements.define(MaximoWorkOrder.is, MaximoWorkOrder);
+  </script>
+</dom-module>

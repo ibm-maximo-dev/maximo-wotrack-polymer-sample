@@ -1,0 +1,62 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+
+<dom-module id="maximo-logout">
+  <template>
+    <style include="shared-styles"></style>
+    <app-localstorage-document key="savedBaseUrl" data="{{baseUrl}}"></app-localstorage-document>
+    <app-location route="{{route}}"></app-location>
+    <iron-ajax
+      auto
+      id="maximoLogoutAjax"
+      with-credentials
+      content-type="application/json"
+      url="[[baseUrl]]maximo/oslc/logout"
+      method="post"
+      handle-as="json"
+      on-response="_handleLogoutResponse"
+      on-error="_handleLogoutError"></iron-ajax>
+      <h1>Logging out...</h1>
+    <template is="dom-if" if="[[error]]">
+        <p class="alert-error"><strong>Error:</strong> [[error]]</p>
+    </template>
+  </template>
+
+  <script>
+    class MaximoLogout extends Polymer.Element {
+      static get is() { return 'maximo-logout'; }
+
+      _handleLogoutResponse(event) {
+        this.dispatchEvent(new CustomEvent('logout', { 
+          bubbles: true, 
+          composed: true
+        }))
+      }
+
+      _handleLogoutError(event) {
+        const req = event.detail.request;
+        if(event.detail.request.xhr &&
+        event.detail.request.xhr.response && 
+        event.detail.request.xhr.response["oslc:Error"] &&
+        event.detail.request.xhr.response["oslc:Error"]["oslc:message"]) {
+          this.error = event.detail.request.xhr.response["oslc:Error"]["oslc:message"];
+        } else {
+          this.error = "Error during logout"
+        }
+        this.dispatchEvent(new CustomEvent('logout', { 
+          bubbles: true, 
+          omposed: true
+        }))
+        this.set('route.path', '/login');
+      }
+    }
+
+    window.customElements.define(MaximoLogout.is, MaximoLogout);
+  </script>
+</dom-module>

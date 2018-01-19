@@ -1,0 +1,202 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/app-storage/app-localstorage/app-localstorage-document.html">
+<link rel="import" href="maximo-icons.html">
+
+<link rel="lazy-import" href="maximo-login.html">
+<link rel="lazy-import" href="maximo-logout.html">
+<link rel="lazy-import" href="maximo-work-orders-list.html">
+<link rel="lazy-import" href="maximo-work-order.html">
+<link rel="lazy-import" href="maximo-not-found.html">
+
+<dom-module id="maximo-app">
+  <template>
+    <style>
+      :host {
+        --app-primary-color: #4285f4;
+        --app-secondary-color: black;
+
+        display: block;
+      }
+
+      app-drawer-layout:not([narrow]) [drawer-toggle] {
+        display: none;
+      }
+
+      app-header {
+        color: #fff;
+        background-color: var(--app-primary-color);
+      }
+
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      .drawer-list {
+        margin: 0 20px;
+      }
+
+      .drawer-list a {
+        display: block;
+        padding: 0 16px;
+        text-decoration: none;
+        color: var(--app-secondary-color);
+        line-height: 40px;
+      }
+
+      .drawer-list a.iron-selected {
+        color: black;
+        font-weight: bold;
+      }
+    </style>
+    <app-localstorage-document key="savedBaseUrl" data="{{baseUrl}}"></app-localstorage-document>
+    <app-location
+        route="{{route}}"
+        url-space-regex="^[[rootPath]]">
+    </app-location>
+    <iron-ajax
+      auto
+      with-credentials
+      content-type="application/json"
+      url="[[baseUrl]]maximo/oslc/whoami"
+      method="get"
+      handle-as="json"
+      content-type="application/json"
+      last-response="{{whoAmI}}"
+      on-response="_handleResponse"
+      on-error="_handleError"
+      debounce-duration="1000"></iron-ajax>
+
+    <app-route
+        route="{{route}}"
+        pattern="[[rootPath]]:page"
+        data="{{routeData}}"
+        tail="{{subroute}}">
+    </app-route>
+
+    <app-drawer-layout fullbleed narrow="{{narrow}}">
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+
+        <app-header slot="header" condenses reveals effects="waterfall">
+          <app-toolbar id="toolBar">
+            <div main-title>Maximo Work Orders</div>
+            <template is="dom-if" if="[[authenticated]]">
+                [[whoAmI.displayName]]
+              <a style="color: #ffffff;font-size: 0.7em;" href="work-order/0">
+                <paper-icon-button icon="add" title="New Work Order"></paper-icon-button>
+              </a>
+              <a style="color: #ffffff;font-size: 0.7em;" href="logout">
+                <paper-icon-button icon="reply" style="color: red;" title="Logout"></paper-icon-button>
+              </a>
+            </template>
+          </app-toolbar>
+        </app-header>
+        <iron-pages
+            style="margin: auto;width: 80%;"
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="maximo-not-found"
+            role="main">
+          <maximo-login name="login" on-authenticated='_onAuthenticated'></maximo-login>
+          <maximo-logout name="logout" on-logout='_onLogout'></maximo-logout>
+          <maximo-not-found name="not-found"></maximo-not-found>
+          <maximo-work-order name="work-order" who-am-i='[[whoAmI]]'></maximo-work-order>
+          <maximo-work-orders-list name="work-orders-list"></maximo-work-orders-list>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout>
+  </template>
+
+  <script>
+    class MaximoApp extends Polymer.Element {
+      static get is() { return 'maximo-app'; }
+
+      static get properties() {
+        return {
+          page: {
+            type: String,
+            reflectToAttribute: true,
+            observer: '_pageChanged',
+          },
+          routeData: Object,
+          subroute: String,
+          // This shouldn't be neccessary, but the Analyzer isn't picking up
+          // Polymer.Element#rootPath
+          rootPath: String,
+          authenticated: {
+            type: Boolean,
+            value: false
+          },
+          whoAmI: {
+            type: Object,
+            notify: true
+          }
+        };
+      }
+
+      //we want the user to go to the home page after authentication
+      _onAuthenticated() {
+        this.set('authenticated', true)
+        this.set('route.path', '/work-orders-list/1')
+      }
+
+      _handleResponse(event) {
+        this.set('authenticated', true)
+        // the user is already authenticated, 
+        // if it is on login page and has a valid whoAmI response, redirect to the wo list
+        if((this.get('route.path') === '/login' || this.get('route.path') === '/') && this.get('whoAmI'))
+          this.set('route.path', '/work-orders-list/1')
+      }
+
+      _handleError(event) {
+        this._onLogout()
+      }
+
+      _onLogout() {
+        this.set('authenticated', false)
+        this.set('route.path', '/login');
+      }
+
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)',
+        ];
+      }
+
+      _routePageChanged(page) {
+        // If no page was found in the route data, page will be an empty string.
+        // Default to 'view1' in that case.
+        this.page = page || 'login';
+      }
+
+      _pageChanged(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('maximo-' + page + '.html');
+        Polymer.importHref(
+            resolvedPageUrl,
+            null,
+            this._showPage404.bind(this),
+            true);
+      }
+
+      _showPage404() {
+        this.page = 'not-found';
+      }
+    }
+
+    window.customElements.define(MaximoApp.is, MaximoApp);
+  </script>
+</dom-module>
