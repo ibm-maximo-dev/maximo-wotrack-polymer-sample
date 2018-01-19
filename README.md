@@ -81,7 +81,7 @@ The [btoa](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobal
 
 The `with-credentials` flag must be set to true in all the requests that are made, so the JavaScript engine can store the authentication session on a cookie and reuse it on subsequent requests. Read more about this mechanism [here](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials). The credentials are invalidated only after they expire or the user logs out.
 
-Check the full sample for more information: https://github.ibm.com/ohio/polymer-app/blob/master/src/maximo-login.html
+Check the full sample for more information: [src/maximo-login.html](src/maximo-login.html)
 
 The authentication mechanism creates a session that is controlled by the Maximo server. To end the session you need to send a `POST` request to the `maximo/oslc/logout` endpoint, which is shown in the following example:
 
@@ -98,7 +98,7 @@ The authentication mechanism creates a session that is controlled by the Maximo 
 
 The logout link on the Sample application redirects to a page that contains the above `iron-ajax` element, and the `auto` attribute forces execution after the page loads.
 
-Check the full sample for more information: https://github.ibm.com/ohio/polymer-app/blob/master/src/maximo-logout.html
+Check the full sample for more information: [src/maximo-logout.html](src/maximo-logout.html)
 
 Sometimes you need to know if the session is still active or not, you can achieve that consulting the `maximo/oslc/whoami` endpoint:
 ```html
@@ -113,7 +113,7 @@ Sometimes you need to know if the session is still active or not, you can achiev
     last-response="{{whoAmI}}"></iron-ajax>
 ```
 
-That mechenism is used on the sample to define if a user is still authenticated after a page reload. Check the full sample for more information: https://github.ibm.com/ohio/polymer-app/blob/master/src/maximo-app.html
+That mechenism is used on the sample to define if a user is still authenticated after a page reload. Check the full sample for more information: [src/maximo-app.html](src/maximo-app.html)
 
 ### Retrieve Resource Set
 
@@ -149,7 +149,7 @@ _urlParams(pageNum) {
 ```
 The above example specifies that the query will return 100 records per page, with only `wonum,description,name,status,status_description, workorderid` fields in each record. The`pageno` attribute defines the current page, so you can change the page by using the 'Next Page' and 'Previous Page' links. It is necessary to set `collectioncount` in order to get the total number of records returned by this query.
 
-Check the full sample for more information: https://github.ibm.com/ohio/polymer-app/blob/master/src/maximo-work-orders-list.html
+Check the full sample for more information: [src/maximo-work-orders-list.html](src/maximo-work-orders-list.html)
 
 ### Get and Update Resource Details
 
@@ -198,5 +198,5 @@ _getSavePayload(workOrder) {
 }
 ```
 
-Check the full sample for more information: https://github.ibm.com/ohio/polymer-app/blob/master/src/maximo-work-order.html
+Check the full sample for more information: [src/maximo-work-order.html](src/maximo-work-order.html)
 
