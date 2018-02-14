@@ -1,5 +1,7 @@
 # Maximo Work Orders Polymer Application
 
+Use the Polymer sample to learn how you can use Maximo application programming interface (APIs) with a web application. This sample uses APIs to perform work order operations.
+
 If you are familiar with Polymer and want to get started with the new release, you're in the right place! If you'd like an introduction to the Polymer project and web components, check [here](https://www.polymer-project.org/2.0/start/).
 
 This document is not intended to be a substitute for the official Maximo API documentation. If any contradiction is present, you must consider the official documentation as the source of truth.
@@ -24,7 +26,7 @@ To change the value of each property, expand the property (click on *View Detail
 
 After saving the properties, select them, clicking on their checkboxes, and click *Live Refresh*, on *Common Actions* in the left menu.
 
-## Installation
+## Getting started
 
 1. Clone this repository.
 
@@ -200,3 +202,11 @@ _getSavePayload(workOrder) {
 
 Check the full sample for more information: [src/maximo-work-order.html](src/maximo-work-order.html)
 
+## References
+
+For more information, see the following resources:
+- [IBM Asset Management Developer Center](https://developer.ibm.com/iot/asset-management/)
+
+
+
+© Copyright IBM Corporation 2018.
