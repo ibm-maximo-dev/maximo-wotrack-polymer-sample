@@ -9,6 +9,7 @@
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/neon-animation/web-animations.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="maximo-work-order">
@@ -150,6 +151,7 @@
         if(!this._showDetails()) {
           this.set('route.path', '/work-order/' + this.get('workOrder.spi:workorderid'))
         } else {
+          this.error = null;
           this.success = "Work Order Successfully Saved"
         }
       }
@@ -161,8 +163,10 @@
           event.detail.request.xhr.response["oslc:Error"] &&
           event.detail.request.xhr.response["oslc:Error"]["oslc:message"]) {
           this.error = event.detail.request.xhr.response["oslc:Error"]["oslc:message"];
+          this.success = null;
         } else {
           this.error = "Could not save Work Order"
+          this.success = null;
         }
       }
 
@@ -179,6 +183,8 @@
       }
 
       saveWorkOrder() {
+        this.error=null;
+        this.success=null;
         this.$.maximoSaveWorkOrderAjax.headers = this._getSaveHeaders()
         this.$.maximoSaveWorkOrderAjax.body = this._getSavePayload(this.get('workOrder'))
         this.$.maximoSaveWorkOrderAjax.generateRequest()

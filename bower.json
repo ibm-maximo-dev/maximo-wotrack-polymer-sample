@@ -25,7 +25,9 @@
     "iron-form": "PolymerElements/iron-form#^2.0.1",
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
     "paper-toolbar": "PolymerElements/paper-toolbar#^2.0.0",
-    "iron-icons": "PolymerElements/iron-icons#^2.0.1"
+    "iron-icons": "PolymerElements/iron-icons#^2.0.1",
+    "neon-animation": "PolymerElements/neon-animation#^2.2.0",
+    "web-animations-js": "^2.3.1"
   },
   "resolutions": {
     "polymer": "^2.0.0"

@@ -13,8 +13,8 @@ You must have a basic knowledge about web development, mainly JavaScript, Polyme
 - [Polymer 2](https://www.polymer-project.org/) Installed (check the instructions [here](https://www.polymer-project.org/2.0/start/install-2-0))
 
 - A Maximo instance running that has the following system properties defined:
-  -  `mxe.oslc.aclalloworigin` defined with the URL or IP address of the Polymer application.
-  - `mxe.oslc.aclallowheaders` defined with `maxauth,x-method-override,patchtype,content-type,accept,x-public-uri, properties`
+  -  `mxe.oslc.aclalloworigin` defined with the base URL of the Polymer application. (e.g., `http://127.0.0.1:8081`)
+  - `mxe.oslc.aclallowheaders` defined with `maxauth,x-method-override,patchtype,content-type,accept,x-public-uri,properties`
 
 The sample application was built and tested using Google Chrome Version 63.
 
@@ -28,7 +28,7 @@ After saving the properties, select them, clicking on their checkboxes, and clic
 
 ## Getting started
 
-1. Clone this repository.
+1. Clone this repository, or download the sample sources.
 
 2. Run the following commands on a terminal:
 ```
@@ -40,7 +40,7 @@ polymer serve
 
 3. The console will print a localhost URL of the server hosting the application, open it in a browser to load the login screen. The URL should look similar to this: [http://127.0.0.1:8081](http://127.0.0.1:8081), but the port number may be different.
 
-4. If everything worked, the browser should present a login screen with three fields: `Username`, `Password` and `Maximo URL`, the first two should be filled with a valid maximo user credential and the last one the base URL of the Maximo instance to where the validation should be sent, be sure to include the protocol part(*HTTP://* or *HTTPS://*) on the beginning of the URL.
+4. If everything worked, the browser should present a login screen with three fields: `Username`, `Password` and `Maximo URL`, the first two should be filled with a valid maximo user credential and the last one the base URL of the Maximo instance to where the validation should be sent, be sure to include the protocol part(*HTTP://* or *HTTPS://*) on the beginning of the URL.  The URL will only contain the host and port and not the full Maximo context.  e.g., `http://maximo.server.com/`
 
 5. After a successful login, the application should open the Work Order Listing page.
 
