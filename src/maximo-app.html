@@ -59,6 +59,11 @@
         color: black;
         font-weight: bold;
       }
+
+      /*paper-button {*/
+        /*background-color: var(--paper-indigo-500);*/
+        /*color: white;*/
+      /*}*/
     </style>
     <app-localstorage-document key="savedBaseUrl" data="{{baseUrl}}"></app-localstorage-document>
     <app-location
@@ -94,13 +99,9 @@
           <app-toolbar id="toolBar">
             <div main-title>Maximo Work Orders</div>
             <template is="dom-if" if="[[authenticated]]">
-                [[whoAmI.displayName]]
-              <a style="color: #ffffff;font-size: 0.7em;" href="work-order/0">
-                <paper-icon-button icon="add" title="New Work Order"></paper-icon-button>
-              </a>
-              <a style="color: #ffffff;font-size: 0.7em;" href="logout">
-                <paper-icon-button icon="reply" style="color: red;" title="Logout"></paper-icon-button>
-              </a>
+              <span style="padding-right: 20px">[[whoAmI.displayName]]</span>
+              <paper-button raised class="green" on-tap="goto" data-args="work-order/0">Create Work Order</paper-button>
+              <paper-button raised class="green" on-tap="_onLogout">Log out</paper-button>
             </template>
           </app-toolbar>
         </app-header>
@@ -145,6 +146,11 @@
             notify: true
           }
         };
+      }
+
+      goto(e) {
+        var link = e.target.getAttribute('data-args')
+        this.set('route.path', link);
       }
 
       //we want the user to go to the home page after authentication
