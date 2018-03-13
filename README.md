@@ -196,10 +196,15 @@ _getSavePayload(workOrder) {
 
 See [src/maximo-work-order.html](src/maximo-work-order.html) in the sample code for more information. 
 
-## References
+## Give us your Feedback
+Let us know your opinion of this sample by completing this short (3 minute) survey.
 
-- [IBM Asset Management Developer Center](http://developer.ibm.com/assetmanagement)
+[Polymer sample feedback](https://www.surveygizmo.com/s3/4254696/Maximo-DevCenter-Polymer-sample-feedback)
 
+
+## IBM Maximo Developer Center
+For more samples and content about integrating with IBM Maximo, see the 
+- [IBM Maximo Developer Center](http://developer.ibm.com/assetmanagement)
 
 
 © Copyright IBM Corporation 2018.
